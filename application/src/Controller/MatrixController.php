@@ -444,7 +444,7 @@ class MatrixController extends AbstractController {
                 ]
             );
 
-            if (empty($membership)) {
+            if (!empty($membership)) {
                 return new JsonResponse(
                     (object) [
                     'errcode' => 'M_NOT_MEMBER',
