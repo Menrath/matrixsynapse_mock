@@ -386,7 +386,7 @@ class MatrixController extends AbstractController {
     }
 
     /**
-     * Create Matrix room.
+     * Invite a user into an existing Matrix room.
      *
      * @param string  $serverID The server ID.
      * @param string  $roomID   The Matrix rooms ID.
@@ -412,12 +412,10 @@ class MatrixController extends AbstractController {
         $entityManager = $this->getDoctrine()->getManager();
 
         // Check room exists.
-        $room = $entityManager->getRepository(Room::class)->findOneBy(
-            [
+        $room = $entityManager->getRepository(Room::class)->findOneBy([
             'serverid' => $serverID,
             'roomid' => $roomID,
-            ]
-        );
+        ]);
         if (!$room) {
             return $this->getUnknownRoomResponse();
         }
@@ -428,34 +426,27 @@ class MatrixController extends AbstractController {
             return $check['message'];
         }
 
-        $user = $entityManager->getRepository(User::class)->findOneBy(
-            [
+        $user = $entityManager->getRepository(User::class)->findOneBy([
             'serverid' => $serverID,
             'userid' => $payload->user_id,
-            ]
-        );
+        ]);
         if ($user) {
             // Cannot invite user that is already in the room.
-            $membership = $entityManager->getRepository(RoomMember::class)->findOneBy(
-                [
-                    'serverid' => $serverID,
-                    'room' => $room,
-                    'user' => $user,
-                ]
-            );
+            $membership = $entityManager->getRepository(RoomMember::class)->findOneBy([
+                'serverid' => $serverID,
+                'room' => $room,
+                'user' => $user,
+            ]);
 
             if (!empty($membership)) {
-                return new JsonResponse(
-                    (object) [
+                return new JsonResponse((object) [
                     'errcode' => 'M_NOT_MEMBER',
                     'error' => 'The invitee is already a member of the room.'
-                    ],
-                    403
-                );
+                ], 403);
             }
         }
 
-        return new JsonResponse((object)[]);
+        return new JsonResponse((object)[], 200);
     }
 
     /**
